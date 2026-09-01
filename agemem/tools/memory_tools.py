@@ -168,7 +168,7 @@ class MemoryTools:
             },
         )
         
-        removed = self.stm.replace_segments(segment_ids, replacement)
+        removed = self.stm.replace_segment(segment_ids, replacement)
         
         return ToolResult(
             success=True,
