@@ -105,7 +105,7 @@ class MemoryTools:
         )
     
     def retrieve (self, query: str, *, top_k: int = 5) -> ToolResult:
-        entries = self.ltm.retrieve(query, top_k=top_k)
+        entries = self.ltm.search(query, top_k=top_k)
         
         segments: list[ContextSegment] = []
         
