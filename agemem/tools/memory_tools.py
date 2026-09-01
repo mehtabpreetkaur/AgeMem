@@ -82,3 +82,24 @@ class MemoryTools:
                 "confidence": entry.confidence,
             },
         )
+    
+    def delete(self, memory_id: str) -> ToolResult:
+        entry = self.ltm.delete(memory_id)
+        
+        if entry is None:
+            return ToolResult(
+                success=False,
+                tool_name="DELETE",
+                changed_state=False,
+                error=f"Memory entry not found: {memory_id}",
+            )
+        
+        return ToolResult(
+            success=True,
+            tool_name="DELETE",
+            changed_state=True,
+            result={
+                "memory_id": entry.id,
+                "content": entry.content,
+            }
+        )
