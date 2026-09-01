@@ -135,3 +135,48 @@ class MemoryTools:
                 "memory_ids": [entry.id for entry in entries],
             },
         )
+    
+    def summary(
+        self,
+        segment_ids: set[str],
+        *,
+        summary_text: str | None = None,
+    ) -> ToolResult:
+        segments = [
+            segment 
+            for segment in self.stm.list_segments()
+            if segment.id in segment_ids
+        ]
+        
+        if not segments:
+            return ToolResult(
+                success=False,
+                tool_name="SUMMARY",
+                changed_state=False,
+                error="No matching STM segments found to summarize.",
+            )
+        
+        if summary_text is None:
+            summary_text = " ".join(segment.content for segment in segments)
+        
+        replacement = ContextSegment.create(
+            content=summary_text,
+            role="summary",
+            metadata={
+                "summarized_segment_ids": [segment.id for segment in segments],
+                "summarized_count": len(segments),
+            },
+        )
+        
+        removed = self.stm.replace_segments(segment_ids, replacement)
+        
+        return ToolResult(
+            success=True,
+            tool_name="SUMMARY",
+            changed_state=True,
+            result={
+                "summary_segment_id": replacement.id,
+                "removed_segment_ids": [segment.id for segment in removed],
+                "summarized_text": replacement.content,
+            },
+        )
