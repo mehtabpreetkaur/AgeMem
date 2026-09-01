@@ -103,3 +103,35 @@ class MemoryTools:
                 "content": entry.content,
             }
         )
+    
+    def retrieve (self, query: str, *, top_k: int = 5) -> ToolResult:
+        entries = self.ltm.retrieve(query, top_k=top_k)
+        
+        segments: list[ContextSegment] = []
+        
+        for entry in entries:
+            segment = ContextSegment.create(
+                content=entry.content,
+                role="retrieved_memory",
+                metadata={
+                    "memory_id": entry.id,
+                    "kind": entry.kind,
+                    "importance": entry.importance,
+                    "confidence": entry.confidence,
+                },
+            )
+            segments.append(segment)
+            
+        self.stm.extend(segments)
+        
+        return ToolResult(
+            success=True,
+            tool_name="RETRIEVE",
+            changed_state=True,
+            result={
+                "query": query,
+                "retrieved_count": len(entries),
+                "segment_ids": [segment.id for segment in segments],
+                "memory_ids": [entry.id for entry in entries],
+            },
+        )
