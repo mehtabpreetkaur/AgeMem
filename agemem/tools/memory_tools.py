@@ -180,3 +180,24 @@ class MemoryTools:
                 "summarized_text": replacement.content,
             },
         )
+    
+    def filter(self, segment_ids: set[str]) -> ToolResult:
+        removed = self.stm.remove_segments(segment_ids)
+        
+        if not removed:
+            return ToolResult(
+                success=False,
+                tool_name="FILTER",
+                changed_state=False,
+                error="No matching STM segments found to filter.",
+            )
+        
+        return ToolResult(
+            success=True,
+            tool_name="FILTER",
+            changed_state=True,
+            result={
+                "removed_segment_ids": [segment.id for segment in removed],
+                "removed_count": len(removed),
+            },
+        )
